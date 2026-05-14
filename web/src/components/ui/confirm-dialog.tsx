@@ -32,6 +32,10 @@ import { Button } from "@/components/ui/button";
  * the promise resolves — previously the dialog would stay open forever if the caller
  * forgot to flip `loading` back to false and didn't call onOpenChange themselves.
  * Fixed by always closing after the awaited onConfirm() resolves successfully.
+ *
+ * Personal note 4: added keyboard shortcut — pressing Enter while the dialog is open
+ * will trigger the confirm action, which feels more natural for quick confirmations.
+ * Cancel still maps to Escape via the Dialog primitive's built-in behavior.
  */
 
 export interface ConfirmDialogProps {
@@ -82,6 +86,19 @@ export function ConfirmDialog({
     onOpenChange(false);
   };
 
+  // Allow Enter key to trigger confirm while the dialog is open.
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !loading) {
+        e.preventDefault();
+        handleConfirm();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, loading]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
@@ -91,12 +108,8 @@ export function ConfirmDialog({
             <DialogDescription>{description}</DialogDescription>
           )}
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={loading}
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button
