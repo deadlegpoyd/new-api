@@ -27,6 +27,11 @@ import { Button } from "@/components/ui/button";
  *
  * Personal note 2: bumped max-width to 480px — the default 425px felt a bit cramped
  * when description text wrapped to 3+ lines on smaller viewports.
+ *
+ * Personal note 3: auto-close after confirm now also fires when loading is true but
+ * the promise resolves — previously the dialog would stay open forever if the caller
+ * forgot to flip `loading` back to false and didn't call onOpenChange themselves.
+ * Fixed by always closing after the awaited onConfirm() resolves successfully.
  */
 
 export interface ConfirmDialogProps {
@@ -71,10 +76,10 @@ export function ConfirmDialog({
 
   const handleConfirm = async () => {
     await onConfirm();
-    // Only close automatically when not controlled externally via `loading`.
-    if (!loading) {
-      onOpenChange(false);
-    }
+    // Always close after the promise resolves. If the caller is managing
+    // loading state externally they can still prevent reopening via their own
+    // onOpenChange handler, but at least the dialog won't get stuck open.
+    onOpenChange(false);
   };
 
   return (
@@ -99,33 +104,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             disabled={loading}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg
-                  className="animate-spin h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  />
-                </svg>
-                {confirmLabel}
-              </span>
-            ) : (
-              confirmLabel
-            )}
+            {loading ? "Loading..." : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
