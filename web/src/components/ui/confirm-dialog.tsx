@@ -20,6 +20,10 @@ import { Button } from "@/components/ui/button";
  *     description="Are you sure you want to delete this item? This action cannot be undone."
  *     onConfirm={handleDelete}
  *   />
+ *
+ * Personal note: changed default confirmVariant to "default" so non-destructive
+ * confirmations (e.g. "Save changes") don't show up red by default. Callers that
+ * need the red button should pass confirmVariant="destructive" explicitly.
  */
 
 export interface ConfirmDialogProps {
@@ -35,7 +39,7 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   /** Label for the cancel button. Defaults to "Cancel". */
   cancelLabel?: string;
-  /** Variant applied to the confirm button. Defaults to "destructive". */
+  /** Variant applied to the confirm button. Defaults to "default". */
   confirmVariant?: React.ComponentProps<typeof Button>["variant"];
   /** Called when the user clicks the confirm button. */
   onConfirm: () => void | Promise<void>;
@@ -52,7 +56,7 @@ export function ConfirmDialog({
   description,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  confirmVariant = "destructive",
+  confirmVariant = "default",
   onConfirm,
   onCancel,
   loading = false,
@@ -99,7 +103,6 @@ export function ConfirmDialog({
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  aria-hidden="true"
                 >
                   <circle
                     className="opacity-25"
