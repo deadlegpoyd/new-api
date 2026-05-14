@@ -24,6 +24,9 @@ import { Button } from "@/components/ui/button";
  * Personal note: changed default confirmVariant to "default" so non-destructive
  * confirmations (e.g. "Save changes") don't show up red by default. Callers that
  * need the red button should pass confirmVariant="destructive" explicitly.
+ *
+ * Personal note 2: bumped max-width to 480px — the default 425px felt a bit cramped
+ * when description text wrapped to 3+ lines on smaller viewports.
  */
 
 export interface ConfirmDialogProps {
@@ -76,7 +79,7 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && (
@@ -99,7 +102,7 @@ export function ConfirmDialog({
             {loading ? (
               <span className="flex items-center gap-2">
                 <svg
-                  className="h-4 w-4 animate-spin"
+                  className="animate-spin h-4 w-4"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
