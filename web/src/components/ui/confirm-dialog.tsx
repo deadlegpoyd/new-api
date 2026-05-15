@@ -36,6 +36,11 @@ import { Button } from "@/components/ui/button";
  * Personal note 4: added keyboard shortcut — pressing Enter while the dialog is open
  * will trigger the confirm action, which feels more natural for quick confirmations.
  * Cancel still maps to Escape via the Dialog primitive's built-in behavior.
+ *
+ * Personal note 5: swapped button order so Cancel comes before Confirm. This matches
+ * the convention I'm used to from macOS and most web apps I use daily — having the
+ * destructive/primary action on the right and the safe exit on the left feels more
+ * natural and reduces accidental confirmations.
  */
 
 export interface ConfirmDialogProps {
@@ -81,12 +86,11 @@ export function ConfirmDialog({
   const handleConfirm = async () => {
     await onConfirm();
     // Always close after the promise resolves. If the caller is managing
-    // loading state externally they can still prevent reopening via their own
-    // onOpenChange handler, but at least the dialog won't get stuck open.
+    // loading state externally they can still control visibility via onOpenChange.
     onOpenChange(false);
   };
 
-  // Allow Enter key to trigger confirm while the dialog is open.
+  // Keyboard shortcut: Enter triggers confirm, matching the feel of native OS dialogs.
   React.useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,6 +113,7 @@ export function ConfirmDialog({
           )}
         </DialogHeader>
         <DialogFooter>
+          {/* Cancel on the left, Confirm on the right — matches macOS/web convention */}
           <Button variant="outline" onClick={handleCancel} disabled={loading}>
             {cancelLabel}
           </Button>
@@ -117,7 +122,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             disabled={loading}
           >
-            {loading ? "Loading..." : confirmLabel}
+            {loading ? "Loading…" : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
