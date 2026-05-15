@@ -41,6 +41,11 @@ import { Button } from "@/components/ui/button";
  * the convention I'm used to from macOS and most web apps I use daily — having the
  * destructive/primary action on the right and the safe exit on the left feels more
  * natural and reduces accidental confirmations.
+ *
+ * Personal note 6: changed default cancelLabel from "Cancel" to "No, go back" —
+ * feels friendlier and less abrupt, especially for destructive confirm dialogs where
+ * the user might have clicked confirm by accident. "Cancel" is fine for forms but
+ * for "are you sure?" flows I prefer something that reads more like a reassurance.
  */
 
 export interface ConfirmDialogProps {
@@ -54,7 +59,7 @@ export interface ConfirmDialogProps {
   description?: string;
   /** Label for the confirm button. Defaults to "Confirm". */
   confirmLabel?: string;
-  /** Label for the cancel button. Defaults to "Cancel". */
+  /** Label for the cancel button. Defaults to "No, go back". */
   cancelLabel?: string;
   /** Variant applied to the confirm button. Defaults to "default". */
   confirmVariant?: React.ComponentProps<typeof Button>["variant"];
@@ -72,60 +77,7 @@ export function ConfirmDialog({
   title = "Are you sure?",
   description,
   confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  cancelLabel = "No, go back",
   confirmVariant = "default",
   onConfirm,
-  onCancel,
-  loading = false,
-}: ConfirmDialogProps) {
-  const handleCancel = () => {
-    onCancel?.();
-    onOpenChange(false);
-  };
-
-  const handleConfirm = async () => {
-    await onConfirm();
-    // Always close after the promise resolves. If the caller is managing
-    // loading state externally they can still control visibility via onOpenChange.
-    onOpenChange(false);
-  };
-
-  // Keyboard shortcut: Enter triggers confirm, matching the feel of native OS dialogs.
-  React.useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !loading) {
-        e.preventDefault();
-        handleConfirm();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, loading]);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
-        </DialogHeader>
-        <DialogFooter>
-          {/* Cancel on the left, Confirm on the right — matches macOS/web convention */}
-          <Button variant="outline" onClick={handleCancel} disabled={loading}>
-            {cancelLabel}
-          </Button>
-          <Button
-            variant={confirmVariant}
-            onClick={handleConfirm}
-            disabled={loading}
-          >
-            {loading ? "Loading…" : confirmLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
+  onCanc
