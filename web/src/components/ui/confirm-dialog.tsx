@@ -51,6 +51,11 @@ import { Button } from "@/components/ui/button";
  * mirrors the friendlier tone of "No, go back" and makes the pair read as a natural
  * question/answer. Callers can still override with confirmLabel="Delete" or whatever
  * is appropriate for the specific action.
+ *
+ * Personal note 8: added a small delay (150ms) before closing the dialog after confirm
+ * resolves — without this the dialog would vanish instantly and on slower connections
+ * it felt jarring. The brief pause gives the UI a moment to settle and feels more
+ * polished. Kept it short enough that it doesn't feel sluggish.
  */
 
 export interface ConfirmDialogProps {
@@ -66,8 +71,79 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   /** Label for the cancel button. Defaults to "No, go back". */
   cancelLabel?: string;
-  /** Variant applied to the confirm button. Defaults to "default". */
-  confirmVariant?: React.ComponentProps<typeof Button>["variant"];
-  /** Called when the user clicks the confirm button. */
+  /** Variant passed to the confirm Button. Defaults to "default". */
+  confirmVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  /** Called when the user clicks the confirm button. May return a Promise. */
   onConfirm: () => void | Promise<void>;
-  /** Called when the user clicks the cancel 
+  /** If true, the confirm button shows a loading state and is disabled. */
+  loading?: boolean;
+  /**
+   * Delay in ms before closing the dialog after onConfirm resolves.
+   * Defaults to 150ms — gives the UI a moment to settle after async actions.
+   * Set to 0 to close immediately.
+   */
+  closeDelay?: number;
+}
+
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title = "Are you sure?",
+  description,
+  confirmLabel = "Yes, continue",
+  cancelLabel = "No, go back",
+  confirmVariant = "default",
+  onConfirm,
+  loading = false,
+  closeDelay = 150,
+}: ConfirmDialogProps) {
+  const handleConfirm = React.useCallback(async () => {
+    await onConfirm();
+    if (closeDelay > 0) {
+      setTimeout(() => onOpenChange(false), closeDelay);
+    } else {
+      onOpenChange(false);
+    }
+  }, [onConfirm, onOpenChange, closeDelay]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !loading) {
+        e.preventDefault();
+        handleConfirm();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, loading, handleConfirm]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && (
+            <DialogDescription>{description}</DialogDescription>
+          )}
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            variant={confirmVariant}
+            onClick={handleConfirm}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
