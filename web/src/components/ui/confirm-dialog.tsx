@@ -46,6 +46,11 @@ import { Button } from "@/components/ui/button";
  * feels friendlier and less abrupt, especially for destructive confirm dialogs where
  * the user might have clicked confirm by accident. "Cancel" is fine for forms but
  * for "are you sure?" flows I prefer something that reads more like a reassurance.
+ *
+ * Personal note 7: changed default confirmLabel from "Confirm" to "Yes, continue" —
+ * mirrors the friendlier tone of "No, go back" and makes the pair read as a natural
+ * question/answer. Callers can still override with confirmLabel="Delete" or whatever
+ * is appropriate for the specific action.
  */
 
 export interface ConfirmDialogProps {
@@ -57,7 +62,7 @@ export interface ConfirmDialogProps {
   title?: string;
   /** Descriptive body text shown below the title. */
   description?: string;
-  /** Label for the confirm button. Defaults to "Confirm". */
+  /** Label for the confirm button. Defaults to "Yes, continue". */
   confirmLabel?: string;
   /** Label for the cancel button. Defaults to "No, go back". */
   cancelLabel?: string;
@@ -65,19 +70,4 @@ export interface ConfirmDialogProps {
   confirmVariant?: React.ComponentProps<typeof Button>["variant"];
   /** Called when the user clicks the confirm button. */
   onConfirm: () => void | Promise<void>;
-  /** Called when the user clicks the cancel button. */
-  onCancel?: () => void;
-  /** When true the confirm button shows a loading spinner and is disabled. */
-  loading?: boolean;
-}
-
-export function ConfirmDialog({
-  open,
-  onOpenChange,
-  title = "Are you sure?",
-  description,
-  confirmLabel = "Confirm",
-  cancelLabel = "No, go back",
-  confirmVariant = "default",
-  onConfirm,
-  onCanc
+  /** Called when the user clicks the cancel 
